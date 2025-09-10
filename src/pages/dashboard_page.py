@@ -2,13 +2,13 @@ from selenium.webdriver.common.by import By
 from .base_page import BasePage
 
 class DashboardPage(BasePage):
-    DASH_MARKER = (By.XPATH, "//h6[contains(.,'Dashboard')]")
-    USER_MENU = (By.CSS_SELECTOR, "span.oxd-userdropdown-tab")  # icon user
-    BTN_LOGOUT = (By.XPATH, "//a[normalize-space()='Logout']")
+    DASH_MARKER = (By.CSS_SELECTOR, "header h6.oxd-topbar-header-breadcrumb-module")
 
-    def assert_loaded(self):
-        self.wait_visible(self.DASH_MARKER)
-
-    def logout(self):
-        self.click(self.USER_MENU)
-        self.click(self.BTN_LOGOUT)
+    def assert_loaded(self, timeout=20):
+        # chờ URL đổi sang dashboard (hai pattern thường gặp) và header breadcrumb hiện ra
+        try:
+            self.wait_url_contains('/dashboard', timeout=timeout)
+        except Exception:
+            # fallback path đôi khi có '/dashboard/index'
+            self.wait_url_contains('/dashboard/index', timeout=timeout)
+        self.wait_visible(self.DASH_MARKER, timeout=timeout)
