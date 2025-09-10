@@ -1,41 +1,37 @@
-
----
-
-# GitHub Actions CI: `.github/workflows/ci.yml`
-
-```yaml
 name: UI Tests (Selenium + Pytest)
-
-env:
-  PYTHONPATH: .
-
 
 on:
   push:
     branches: [ "main", "master" ]
   pull_request:
 
+env:
+  PYTHONPATH: .   # để từ root import được src.*
+
 jobs:
   test:
     runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
 
-      - uses: actions/setup-python@v5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
         with:
           python-version: "3.11"
 
-      # Cài Chrome ổn định trên runner
       - name: Setup Chrome
-        uses: browser-actions/setup-chrome@v1
         id: chrome
+        uses: browser-actions/setup-chrome@v1
+        # outputs.chrome-path sẽ là đường dẫn chrome thực tế
 
-      - name: Install deps
+      - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Run pytest (headless)
+      - name: Run pytest (headless) and generate HTML report
         env:
           CHROME_BIN: ${{ steps.chrome.outputs.chrome-path }}
           BASE_URL: https://opensource-demo.orangehrmlive.com/
@@ -43,9 +39,10 @@ jobs:
           PASSWORD: admin123
           HEADLESS: "true"
         run: |
+          mkdir -p reports
           pytest --html=reports/report.html --self-contained-html
 
-      - name: Upload report
+      - name: Upload HTML report artifact
         uses: actions/upload-artifact@v4
         with:
           name: ui-report
