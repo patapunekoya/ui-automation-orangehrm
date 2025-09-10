@@ -9,7 +9,7 @@ def test_pim_search_employee(driver):
     login.login(config.USERNAME, config.PASSWORD)
     dash.assert_loaded()
     pim.open_pim()
-    pim.search_employee("Linda")  # demo thường có user tên Linda
+    pim.search_employee("Ranga  Akunuri")  # demo thường có user tên Linda
     # chấp nhận 2 trường hợp: có kết quả hoặc No Records, miễn là không crash
     rows = pim.finds(pim.TABLE_ROWS)
     no_records = len(pim.finds(pim.NO_RECORDS)) > 0

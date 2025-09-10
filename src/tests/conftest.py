@@ -1,26 +1,38 @@
-
-import sys, os
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
-
-import pytest
+import os, pytest
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
-from webdriver_manager.chrome import ChromeDriverManager
-from selenium.webdriver.chrome.service import Service as ChromeService
 from src.utils import config
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="function")
 def driver():
-    options = Options()
-    if config.HEADLESS:
-        options.add_argument("--headless=new")
-    options.add_argument("--no-sandbox")
-    options.add_argument("--disable-dev-shm-usage")
-    options.add_argument("--window-size=1366,768")
-    if config.CHROME_BINARY:
-        options.binary_location = config.CHROME_BINARY
+    opts = Options()
+    if str(config.HEADLESS).lower() in ("1","true","yes"):
+        opts.add_argument("--headless=new")
+    opts.add_argument("--no-sandbox")
+    opts.add_argument("--disable-dev-shm-usage")
+    opts.add_argument("--disable-gpu")
+    opts.add_argument("--window-size=1366,768")
+    if getattr(config, "CHROME_BINARY", None):
+        opts.binary_location = config.CHROME_BINARY
 
-    driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()), options=options)
-    driver.implicitly_wait(2)  # nhẹ thôi, chờ explicit là chính
-    yield driver
-    driver.quit()
+    drv = webdriver.Chrome(options=opts)
+    yield drv
+    try:
+        drv.quit()
+    except Exception:
+        pass
+
+from src.pages.login_page import LoginPage
+
+@pytest.fixture(autouse=True)
+def fresh_session(driver):
+    # dọn cookies/storage và về trang login trước mỗi test
+    try:
+        driver.delete_all_cookies()
+        driver.execute_script("""
+            try{ window.sessionStorage.clear(); }catch(e){}
+            try{ window.localStorage.clear(); }catch(e){}
+        """)
+    except Exception:
+        pass
+    LoginPage(driver).open(config.BASE_URL)
