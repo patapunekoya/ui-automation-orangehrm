@@ -44,7 +44,7 @@ HEADLESS = True   # chạy ẩn trình duyệt
 
 ## Chạy test
 ```bash
-pytest --html=reports/report.html --self-contained-html -v
+pytest -v --html=reports/index.html --self-contained-html
 ```
 
 Sau khi chạy xong, mở báo cáo:
