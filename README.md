@@ -49,7 +49,7 @@ pytest -v --html=reports/index.html --self-contained-html
 
 Sau khi chạy xong, mở báo cáo:
 ```
-reports/report.html
+reports/index.html
 ```
 
 ## GitHub Actions CI
